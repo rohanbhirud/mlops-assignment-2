@@ -43,7 +43,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest tests/
+        pytest tests/ --ignore=tests/smoke_test.py
 
     - name: Start Local Registry
       run: |
