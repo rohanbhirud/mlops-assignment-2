@@ -2,12 +2,6 @@ FROM python:3.10-slim-bullseye
 
 WORKDIR /app
 
-# Set proxy environment variables
-ENV HTTP_PROXY=http://fastweb.bell.ca:80
-ENV HTTPS_PROXY=http://fastweb.bell.ca:80
-ENV http_proxy=http://fastweb.bell.ca:80
-ENV https_proxy=http://fastweb.bell.ca:80
-
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
@@ -16,19 +10,6 @@ RUN useradd -m -u 1000 appuser && \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
-
-# Copy and install requirements with proxy
-#COPY requirements.txt ./
-#RUN pip install --no-cache-dir --upgrade pip \
-#    --proxy http://fastweb.bell.ca:80 \
-#    --trusted-host pypi.python.org \
-#    --trusted-host pypi.org \
-#    --trusted-host files.pythonhosted.org && \
-#    pip install --no-cache-dir -r requirements.txt \
-    --proxy http://fastweb.bell.ca:80 \
-    --trusted-host pypi.python.org \
-    --trusted-host pypi.org \
-    --trusted-host files.pythonhosted.org
 
 # Copy application code and artifacts
 COPY --chown=appuser:appuser src ./src

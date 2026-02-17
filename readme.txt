@@ -1,105 +1,105 @@
-M2: Model Packaging & Containerization
-====================================
-Objective: Package the trained model into a reproducible, containerized service.
+MLOps Assignment 2 - End-to-End Pipeline
+==========================================
 
-Status:
-- Inference service: DONE (FastAPI) in `src/api.py` ✅
-- Requirements: DONE (pinned versions) in `requirements.txt` ✅
-- Dockerfile: DONE in `Dockerfile` ✅
-- Docker build & verification: DONE ✅
+This project implements an end-to-end MLOps pipeline for binary image classification (Cats vs. Dogs), including data versioning, model training, containerization, and CI/CD.
 
-Features Implemented:
-- FastAPI with /health and /predict endpoints
-- Structured logging with timestamps and error tracking
-- Pydantic response models for type validation
-- File validation (size, format, image integrity)
-- Docker health checks (automatic container monitoring)
-- Security: Non-root user (appuser), no system vulnerabilities
-- Proxy support for corporate environments (fastweb.bell.ca:80)
+## Completed Modules
+✅ **M1: Model Development** (DVC Pipeline, MLflow Tracking)
+✅ **M2: Model Packaging** (FastAPI, Docker)
+✅ **M3: CI Pipeline** (GitHub Actions, Tests, Artifact Publishing)
+✅ **M4: CD Pipeline** (Docker Compose, Automated Deployment)
+✅ **M5: Monitoring** (Logging, Health Checks, Smoke Tests)
 
-Quick Setup (Local, no Docker)
-------------------------------
-1) Install deps:
-   pip install -r requirements.txt
+---
 
-2) Ensure model exists:
-   dvc pull artifacts.dvc
+## 🚀 Quick Start (Local)
 
-3) Run API:
-   uvicorn src.api:app --host 0.0.0.0 --port 8000
+### Prerequisites
+- Python 3.10+
+- Docker & Docker Compose
 
-4) Test health:
-   curl http://localhost:8000/health
+### 1. Setup Environment
+```bash
+# Create virtual env
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 
-5) Test prediction:
-   curl -X POST "http://localhost:8000/predict" -F "file=@path/to/image.jpg"
+# Install dependencies
+pip install -r requirements.txt
+```
 
-Docker Build/Run
-----------------
-1) Build image:
-   docker build -t dogs-cats-api .
+### 2. Prepare Data (DVC)
+This project is configured to use a **local shared remote** at `../dvc-storage`.
 
-2) Run container (background):
-   docker run -d -p 8000:8000 dogs-cats-api
+**Option A: Build from Scratch (Recommended)**
+If you don't have the shared storage folder, simply run:
+```bash
+dvc repro
+```
+This triggers the full pipeline:
+1. **Download**: Fetches data from Kaggle
+2. **Preprocess**: Resizes images & splits data
+3. **Train**: Trains CNN & saves to `artifacts/models/baseline_cnn.pt`
 
-3) Test health endpoint:
-   curl http://localhost:8000/health
+**Option B: Pull from Storage**
+If you have the `dvc-storage` folder placed in the parent directory:
+```bash
+dvc pull
+```
 
-4) Test prediction:
-   curl.exe -X POST "http://localhost:8000/predict" -F "file=@C:\path\to\image.jpg"
+### 3. Run Inference Service (Docker)
+Start the API service:
+```bash
+docker-compose up --build
+```
+The API will be available at: http://localhost:8000
 
-5) Stop container:
-   docker stop <container-id>
+---
 
-Note: Base image is python:3.10-slim-bullseye for security & size optimization
+## 🧪 Testing & Verification
 
+### Unit Tests
+Run the automated test suite (preprocessing & API logic):
+```bash
+pytest tests/
+```
 
-M3: CI Pipeline for Build, Test & Image Creation
-================================================
-Objective: Implement CI to test, build, and publish container images.
+### Smoke Tests (Post-Deployment)
+Once the Docker container is running, execute the verification script:
+```bash
+python tests/smoke_test.py
+```
+*This script checks API health and attempts to predict on `images/Cat.jpg` and `images/Dog.jpg` if present.*
 
-Remaining Steps (NOT done yet):
-1) Automated Testing
-   - Add pytest tests:
-     - one data pre-processing function test
-     - one model utility/inference function test
+### Manual API Test
+1. Open Browser: http://localhost:8000/docs
+2. Upload an image to `/predict`
+3. Or use curl:
+```bash
+curl -X POST "http://localhost:8000/predict" -F "file=@path/to/cat.jpg"
+```
 
-2) CI Setup (GitHub Actions / GitLab CI / Jenkins / Tekton)
-   - On push/PR: checkout -> install deps -> run pytest -> build Docker image
+---
 
-3) Artifact Publishing
-   - Push Docker image to registry (Docker Hub / GHCR / local registry)
+## 🛠 Features & Architecture
 
-Suggested Files to Add:
-- `tests/test_preprocess.py`
-- `tests/test_inference.py`
-- `.github/workflows/ci.yml` (if using GitHub Actions)
+### 1. Data & DVC
+- **Tracking**: `dvc.yaml` defines the DAG (Directed Acyclic Graph).
+- **Remote**: Configured to `../dvc-storage` (simulates a shared network drive).
+- **Data Location**: `data/dog-and-cat-classification-dataset` (Git ignored).
 
+### 2. Model & Training
+- **Framework**: PyTorch
+- **Tracking**: MLflow (logs metrics to `mlruns/`)
+- **Artifacts**: Model saved to `artifacts/models/baseline_cnn.pt`
 
-M4: CD Pipeline & Deployment
-============================
-Objective: Deploy the containerized model and automate updates.
+### 3. API Service (`src/api.py`)
+- **Endpoints**: `/health`, `/predict`
+- **Monitoring**: Structured logging enabled.
 
-Remaining Steps (NOT done yet):
-1) Choose deployment target:
-   - Docker Compose OR Kubernetes (kind/minikube)
-
-2) Provide manifests:
-   - If Docker Compose: `docker-compose.yml`
-   - If Kubernetes: `k8s/deployment.yaml` and `k8s/service.yaml`
-
-3) CD / GitOps flow:
-   - On main branch merge, pull new image and redeploy
-
-4) Smoke Tests:
-   - Post-deploy health check + one prediction call
-   - Fail pipeline if tests fail
-
-
-Notes
------
-- API endpoints implemented:
-  - GET /health
-  - POST /predict
-- Model used: `artifacts/models/baseline_cnn.pt`
-- If you change the model path, set environment variable `MODEL_PATH`.
+### 4. CI/CD Pipeline (`.github/workflows/ci.yml`)
+Automated via GitHub Actions:
+1. **Linting**: `flake8` checks for code quality.
+2. **Testing**: `pytest` runs unit tests.
+3. **Reproducibility**: Runs `dvc repro`.
+4. **Build & Publish**: Builds Docker image and pushes to a local registry.
