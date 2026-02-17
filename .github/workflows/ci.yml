@@ -31,10 +31,6 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Run Tests
-      run: |
-        pytest tests/
-
     - name: DVC Repro (Train Model)
       run: |
         # Configure DVC to not need a remote for local repro
@@ -44,6 +40,10 @@ jobs:
         # In a real scenario, you'd pull from S3 here.
         # For this assignment CI, we'll just run the full pipeline from scratch.
         dvc repro
+
+    - name: Run Tests
+      run: |
+        pytest tests/
 
     - name: Start Local Registry
       run: |
