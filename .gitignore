@@ -2,4 +2,21 @@
 __pycache__/
 *.pyc
 mlruns/
+
+# DVC - Tracked by DVC, ignored by Git
 /artifacts
+/data/dog-and-cat-classification-dataset
+/data/processed_224
+/dvc-storage
+
+# Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/

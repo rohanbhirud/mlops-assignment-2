@@ -1,4 +1,5 @@
 [core]
-    remote = localstore
-['remote "localstore"']
-    url = /Users/sambitmohanty/Desktop/Cursor Code/dvc-store
+    analytics = false
+    remote = local_storage
+['remote "local_storage"']
+    url = ../dvc-storage

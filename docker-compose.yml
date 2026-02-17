@@ -1,0 +1,9 @@
+services:
+  inference-service:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_PATH=/app/artifacts/models/baseline_cnn.pt
+    volumes:
+      - ./artifacts:/app/artifacts

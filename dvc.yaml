@@ -1,0 +1,23 @@
+stages:
+  download_data:
+    cmd: python download_dataset.py
+    deps:
+      - download_dataset.py
+    outs:
+      - data/dog-and-cat-classification-dataset
+
+  preprocess:
+    cmd: python preprocess_dataset.py --source data/dog-and-cat-classification-dataset/PetImages --output data/processed_224
+    deps:
+      - preprocess_dataset.py
+      - data/dog-and-cat-classification-dataset
+    outs:
+      - data/processed_224
+
+  train:
+    cmd: python src/train.py --data-dir data/processed_224 --output-dir artifacts --epochs 3 --sample-frac 0.3
+    deps:
+      - src/train.py
+      - data/processed_224
+    outs:
+      - artifacts
